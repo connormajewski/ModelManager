@@ -1,0 +1,7 @@
+__pycache__/
+model_car_venv/
+backup/
+catalogue.db
+test.db
+catalogue.xlsx
+production_config.json
