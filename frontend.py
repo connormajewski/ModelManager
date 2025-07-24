@@ -7,7 +7,7 @@ import customtkinter as ctk
 from openpyxl import Workbook
 import backend
 from natsort import natsorted
-from ebay import create_test_listing
+from ebay import create_test_listing, clear_inventory
 
 
 
@@ -282,12 +282,12 @@ class Sidebar(ctk.CTkFrame):
         
         self.edit_button = ctk.CTkButton(
             self,
-            text="Shelf Map",
+            text="Clear Ebay Inv",
             width=width,
             fg_color=self.master.button_color,
             hover_color=self.master.button_hover_color,
             font=self.winfo_toplevel().button_font,
-            command=lambda: self.open_map()
+            command=lambda: clear_inventory()
         )
 
         self.edit_button.grid(

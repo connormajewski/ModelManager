@@ -3,9 +3,6 @@ import urllib.parse
 import base64
 import requests
 import webbrowser
-import socketserver
-import http.server
-import time
 
 import xml.etree.ElementTree as ET
 from xml.dom.minidom import parseString
@@ -15,7 +12,6 @@ from tkinter.filedialog import askopenfilenames
 from urllib.parse import unquote
 
 from config import client_id, dev_id, client_secret, runame, refresh_token, access_token, config_file_data, config_file_path
-
 
 def generate_tokens_initial():
     
