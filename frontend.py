@@ -53,8 +53,8 @@ class Sidebar(ctk.CTkFrame):
         manufacturer_menu= ctk.CTkComboBox(
             self,
             width=width,
-            height=self.set_height,
-            values = sorted(['Any', 'lincolnmint', 'racersslotcars', 'tyco', 'specialhobby', 'eidai', 'tauromodel', 'aeroform', 'aviationnebraska', 'bluerider', 'impactkits', 'arrow', 'kopro', 'ertl', 'funline', 'kp', 'nikkoamerica', 'm2machines', 'metalmuscle', 'majorette', 'flycarmodel', 'selectcollectionmrc', 'mengmodel', 'tasmanmodels', 'mania', 'entex', 'dtr', 'bburago', 'minihobbymodels', 'fujimi', 'mightymodels', 'combathobbies', 'exxon', 'takom', 'njinternational', 'hales', 'pegasus', 'vacwings', 'modelcraft', 'alliance', 'protarprovini', 'rareplanevacforms', 'johan', 'arii', 'skywave', 'accurateminiatures', 'eduard', 'bepkyt', 'lindberg', 'fuman', 'fn', 'jadatoys', 'mrc', 'route66', 'racingchampion', 'bandai', 'upc', 'amk', 'bp', 'hobbymodelsfschmidt', 'mymotors', 'protar', 'toystate', 'racingchampions', 'pocherrivarossi', 'testors', 'geraldjelliott', 'miragehobby', 'skybow', 'maquette', 'revellgoodguys', 'megablocks', 'bluejacketshipcrafters', 'bluehattoycompany', 'yatming', 'mattel', 'gasoline', 'excel', 'galaxie', 'czechmodel', 'kawaimodel', 'mira', 'airlines', '21stcenturytoys', 'italeri', 'union', 'roadtough', 'scalextric', 'norscot', 'frog', 'airframe', 'dynamodel', 'idealtoycorporation', 'rpm', 'roco', 'midwestproducts', 'yumo', 'ironshipwrights', 'truedetails', 'imc', 'radioshack', 'matchbox', 'sideways', 'rosso', 'srt', 'grandphoenixmodelproducts', 'dumas', 'amt', 'aviationusk', 'beechnutmodels', 'scalecraftmodels', 'artiplast', 'marfix', 'aero', 'monogram', 'billingboats', 'mantuamodels', 'falcon', 'metrobooks', 'pmmodel', 'lifelikehobbykits', 'carrera', 'doyusha', 'roden', 'radcon', 'guillows', 'imai', 'kae', 'amodel', 'vamodels', 'amerang', 'smer', 'speedzone', 'renwal', 'hess', 'motorworks', 'hecmodelcraft', 'combatconversions', 'hobbyboss', 'qmp', 'ahm', 'welly', 'sunoco', 'wcw', 'kitech', 'afvclub', 'palmer', 'broncomodels', 'comet', 'micromachine', 'williamsbrothers', 'artesanialatina', 'moebiusmodels', 'marivox', 'toymax', 'mobil', 'oez', 'merlinmodels', 'antares', 'citgo', 'scalemodels', 'hotwheels', 'phoenix', 'newray', 'sterlingmodels', 'zhengdefu', 'toybiz', 'sutcliffeproductions', 'sharkit', 'fm', 'amati', 'mpc', 'dynavectorairmodels', 'gunzesangyo', 'americancollectorsinsurance', 'chevroletracing', 'bachmann', 'allwoodbrand', 'miniart', 'toyco', 'siga', 'aa', 'esci', 'cat', 'amtech', 'maintrackhangarproductions', 'hawk', 'pandamodels', 'polarlights', 'tamiya', 'bluewaternavy', 'arrowclub', 'huma', 'thevintageseries', 'dielsengineering', 'hasegawa', 'azur', 'lee', 'lemansminiatures', 'mikepowell', 'onyx', 'trumpeter', 'ppaerokits', 'otaki', 'nichimo', 'cmk', 'toko', 'academy', 'leoman', 'airfix', 'blueprinter', 'micromachines', 'pyro', 'wespemodels', 'nostalgicheroes', 'modelrussia', 'hobbycraft', 'gabriel', 'verlindenproductions', 'kittyhawk', 'redstar', 'formaplane', 'imex', 'kinetic', 'warbirds', 'redbox', 'action', 'revell', 'emhar', 'heller', 'minicraft', 'shelbycollectibles', 'kline', 'easternexpress', 'motormax', 'airmodel', 'rarejets', 'modelshipways', 'occidental', 'elond', 'planetmodels', 'ls', 'arrowmaster', 'promodeler', 'aoshima', 'salvinosjrmodels', 'anson', 'sergal', 'takeone', 'mpm', 'glencoemodels', 'rareplanes', 'modelmaster', 'propagandakompany', 'aurora', 'hitech', 'skillcraft', 'dragon', 'kidsstuff', 'surmodels', 'anditto', 'strombecker', 'maian', 'hubley', 'itc', 'pioneer2', 'encoremodels', 'supermodel', 'tsukudahobby', 'km', 'zvezda', 'quest', 'unknown', 'aer', 'classicairframes', 'hotrad', 'lonestarmodels', 'maisto', 'newbright', 'icm'])    
+            height=self.set_height,  
+            values = ["Any"] + sorted([model_type[0] for model_type in list(backend.distinct_column_values("manufacturer"))])
         )
         
         manufacturer_menu.set("Any")
@@ -81,7 +81,7 @@ class Sidebar(ctk.CTkFrame):
             self,
             width=width,
             height=self.set_height,
-            values=["Any", "unknown", "1:8", "1:12", "1:16", "1:24", "1:25", "1:35", "1:40", "1:64", "1:72", "1:350", "1:700", "1:1144"]
+            values = ["Any"] + natsorted([model_type[0] for model_type in list(backend.distinct_column_values("scale"))])
         )
 
         scale_menu.grid(
@@ -130,7 +130,7 @@ class Sidebar(ctk.CTkFrame):
         condition_menu = ctk.CTkComboBox(
             self,
             width=width,
-            values=["Any", "sealed", "opened"]
+            values = natsorted([model_type[0] for model_type in list(backend.distinct_column_values("condition"))] + ["Any"])
         )
 
         condition_menu.set("Any")
@@ -158,7 +158,7 @@ class Sidebar(ctk.CTkFrame):
             self,
             width=width,
             height=self.set_height,
-            values=["Any", "car", "plane", "helicopter", "rocket", "ship", "balloon", "army", "truck", "submarine", "figurine", "motorcycle", "slotcar", "miscellaneous", "tank"]
+            values = ["Any"] + [model_type[0] for model_type in list(backend.distinct_column_values("model_type"))]
         )
 
         type_menu.grid(
@@ -182,8 +182,8 @@ class Sidebar(ctk.CTkFrame):
         location_menu= ctk.CTkComboBox(
             self,
             width=width,
-            height=self.set_height,
-            values = natsorted(['Any','RIGHT AND SOUTH WALL', 'SHELF 28', 'SHELF 13', 'SLOTCAR SECTION', 'SHELF 18', 'SHELF 8', 'SHELF 14', 'SHELF 5', 'TUB 2', 'SHELF 17', 'TUB 1', 'SHELF 1', 'TUB 9', 'SHELF 24', 'SHELF 6', 'SHELF 21', 'TUB 6', 'TUB 10', 'SLOTCAR BOX', 'SHELF 20', 'SHELF 23', 'TUB 5', 'VACFORM BOX', 'WHITE TABLE', 'TUB 3', 'MICROWAVE BOX', 'MINIATURE TANKS BOX', 'SHELF 3', 'SHELF 15', 'TUB 13', 'SHELF 11', 'TUB 12', 'SMALL ROOM SHELF', 'TUB 15', 'BOX UNDER WHITE TABLE', 'SHELF 19', 'SHELF 10', 'SHELF 22', 'SHELF 4', 'SHELF 2', 'SHELF 16', 'TUB 7', 'TUB 14', 'SHELF 7', 'SHELF 12', 'SHELF 27', 'TUB 17', 'TUB 8', 'TUB 16', 'SHELF 26', 'TUB 11', 'TUB 4', 'SHELF 25', 'DIECAST BOX', 'SHELF 9', 'BACK WALL', 'LEFT WALL'])    
+            height=self.set_height,  
+            values =  ["Any"] + natsorted([model_type[0] for model_type in list(backend.distinct_column_values("location"))])
         )
 
         location_menu.grid(

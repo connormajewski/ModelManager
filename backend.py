@@ -1,5 +1,3 @@
-"Module handling database operations."
-
 import sqlite3
 
 creation_query = '''
@@ -18,7 +16,11 @@ creation_query = '''
     )
 '''
 
-# Initial database creation/connection.
+"""
+    CRUD functions for database. Should really only have to call create_table() when createing database.
+    
+    Pretty simple implementation. Figured canned queries were the way to go when making the program.
+"""
 
 database_file = 'test.db'
 
@@ -34,6 +36,14 @@ def create_database_connection():
         print(f"Error connecting to database: {error}")
         return None
 
+def distinct_column_values(attribute):
+    
+    query = f"SELECT DISTINCT {attribute} FROM models"
+
+    try:
+        return execute_query(query)
+    except sqlite3.Error as error:
+        print(f"Error grabbind distinct values. {error}")
 
 def create_table(creation_query):
 
@@ -63,7 +73,7 @@ def execute_query(query, params=None):
         connection.commit()
         results = cursor.fetchall()
         cursor.close()
-        #print(results)
+        print(results)
         return results
     except sqlite3.Error as error:
         print(f"Error executing query: {error}")
@@ -103,8 +113,6 @@ def add_model(model_id, model_type, manufacturer, make, description, year, scale
         return True
     except sqlite3.Error as error:
         print(f"Error inserting model: {error}")
-
-# These need to be changed to reflect updated database schema.
 
 def update_model(
     model_id,
@@ -166,3 +174,9 @@ def delete_model(model_id):
         return True
     except sqlite3.Error as error:
         print(f"Error deleting model: {error}")
+
+# distinct = distinct_column_values("model_type")
+
+# for e in list(distinct):
+    
+    # print(e[0])
