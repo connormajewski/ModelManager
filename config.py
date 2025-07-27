@@ -1,14 +1,31 @@
-import json
+import dotenv
+import os
 
-config_file_path = "production_config.json"
-config_file = open(config_file_path, "r")
-config_file_data = json.load(config_file)
-config_file.close()
+dotenv_file_path = ".env"
 
-client_id = config_file_data["client_id"]
-dev_id = config_file_data["dev_id"]
-client_secret = config_file_data["client_secret"]
-runame = config_file_data["runame"]
+env_data = dotenv.load_dotenv(dotenv_file_path)
 
-access_token = config_file_data["access_token"]
-refresh_token = config_file_data["refresh_token"]
+client_id = os.getenv("CLIENT_ID")
+client_secret = os.getenv("CLIENT_SECRET")
+runame = os.getenv("RUNAME")
+dev_id = os.getenv("DEV_ID")
+refresh_token = os.getenv("REFRESH_TOKEN")
+access_token = os.getenv("ACCESS_TOKEN")
+
+def set_refresh_token(token):
+    
+    dotenv.set_key(dotenv_file_path, "REFRESH_TOKEN", tokens)
+    
+    refresh_token = os.getenv("REFRESH_TOKEN")
+    
+    return refresh_token
+    
+    
+    
+def set_access_token(token):
+    
+    dotenv.set_key(dotenv_file_path, "ACCESS_TOKEN", token)
+    
+    access_token = os.getenv("ACCESS_TOKEN")
+    
+    return access_token

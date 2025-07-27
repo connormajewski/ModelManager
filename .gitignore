@@ -5,3 +5,4 @@ catalogue.db
 test.db
 catalogue.xlsx
 production_config.json
+.env

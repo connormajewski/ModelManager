@@ -3,6 +3,8 @@ import urllib.parse
 import base64
 import requests
 import webbrowser
+import dotenv
+import os
 
 import xml.etree.ElementTree as ET
 from xml.dom.minidom import parseString
@@ -11,7 +13,10 @@ from tkinter import Tk
 from tkinter.filedialog import askopenfilenames
 from urllib.parse import unquote
 
-from config import client_id, dev_id, client_secret, runame, refresh_token, access_token, config_file_data, config_file_path
+from config import dotenv_file_path, client_id, dev_id, client_secret, runame, refresh_token, access_token
+from config import set_refresh_token, set_access_token
+
+dotenv_data = dotenv.load_dotenv(dotenv_file_path)
 
 """
     This function needs to be called whenever a program is using Ebay API for the first time.
@@ -68,14 +73,8 @@ def generate_tokens_initial():
         
         print("SUCCESS.")
         
-        config_file_data["access_token"] = tokens["access_token"]
-        config_file_data["refresh_token"] = tokens["refresh_token"]
-        
-        config_file = open(config_file_path, "w")
-        
-        json.dump(config_file_data, config_file, indent=2)
-        
-        config_file.close()
+        refresh_token = set_refresh_token(tokens["refresh_token"])
+        access_token = set_access_token(tokens["access_token"])
 
     else:
 
@@ -168,14 +167,8 @@ def refresh_access_token():
     if refresh_access_response.status_code == 200:
         
         tokens = refresh_access_response.json()
-    
-        config_file_data["access_token"] = tokens["access_token"]
         
-        config_file = open(config_file_path, "w")
-        
-        json.dump(config_file_data, config_file, indent=2)
-        
-        config_file.close()
+        access_token = set_access_token(tokens["access_token"])
         
         print("ACCESS CODE REFRESHED.")
     
