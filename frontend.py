@@ -9,8 +9,6 @@ import backend
 from natsort import natsorted
 from ebay import create_test_listing, clear_inventory
 
-
-
 class Sidebar(ctk.CTkFrame):
     
     def __init__(self, master, width, height):
@@ -291,6 +289,8 @@ class Sidebar(ctk.CTkFrame):
             row = 21,
             pady=(10,0),
         )
+        
+        
 
     def sum_cost(self):
         
@@ -699,6 +699,10 @@ class MainWindow(ctk.CTkScrollableFrame):
         super().__init__(master)
 
         self.master = master
+        
+        self.page_number = 1
+        
+        self.maxresults = 22
 
         # This is displayed query results. This is GUI component, NOT actual database results.
 
@@ -747,16 +751,34 @@ class MainWindow(ctk.CTkScrollableFrame):
             
             self.filters.append(self.filter_button)
             
+            # Results Page Buttons
         
+            self.page_button_frame = ctk.CTkFrame(self, width=100)
+            self.page_button_frame.grid(row=8, column=11, pady=(10, 0))
 
-    def display_query(self, queryresults) -> list:
+            self.page_decrement = ctk.CTkButton(self.page_button_frame, text="<", font=(None, 18, "bold"), width=20)
+            self.page_decrement.pack(side="left", padx=(20, 10))
+            
+            self.page_label = ctk.CTkLabel(self.page_button_frame, text="", font=(None, 14))
+            self.page_label.pack(side="left", padx=(0,10))
+
+            self.page_increment = ctk.CTkButton(self.page_button_frame, text=">", font=(None, 18, "bold"), width=20)
+            self.page_increment.pack(side="right")
+           
+            
+            self.page_decrement.bind("<Button-1>", lambda event, value=-1: self.set_page(value))
+            self.page_increment.bind("<Button-1>", lambda event, value=1: self.set_page(value))
+
+    def display_query(self, queryresults, page_number=1) -> list:
 
         "Given a returned query from execute_query(), display to MainWindow object."
 
         # Max number of models to be shown when displaying results.
         # Loading in all results to GUI slows down program considerably. If user wants to view all results, can export to file and view.
 
-        maxresults = 101
+        self.page_number = page_number
+
+        #maxresults = 22
 
         # Current display must be destroyed before results can be shown.
 
@@ -766,23 +788,17 @@ class MainWindow(ctk.CTkScrollableFrame):
 
         # Display results up to maxresults to reduce loading time.
         # Append to models[] to allow for destruction on next display_query() call.
+        
+        x = (page_number - 1) * self.maxresults + 1
+        y = (page_number - 1) * self.maxresults + self.maxresults + 1
+        
+        print(f"{self.page_number}: {x} : {y} :: {y-x+1}")
+        
+        row_index = 2
 
-        for j in range(1, maxresults if len(queryresults) > maxresults else len(queryresults) + 1):#len(queryresults)+1):
+        for j in range(x, y if y < len(queryresults) + 1 else len(queryresults) + 1):#len(queryresults)+1):
             
             i = j - 1
-            
-            # sell_button = ctk.CTkButton(
-                # self,
-                # text=f"{str(queryresults[i][0]) + ':' : >5} {queryresults[i][1] : <16} {queryresults[i][2][:16] : <16} {queryresults[i][4][:24] :<26} {queryresults[i][5] if queryresults[i][5] is not None else '    ' : <6} {queryresults[i][6] : <8} {queryresults[i][7] : <10} {queryresults[i][9] : <20} {queryresults[i][10] : >8.2f}",
-                # fg_color="transparent",
-                # font=("Courier", 14),
-                # #command = lambda: self.test_function(i),
-                
-            # )
-
-            # sell_button.model_id = queryresults[i][0]
-            
-            # sell_button.bind("<Button-1>", lambda event, model_id=sell_button.model_id: self.test_function(model_id))
 
             label = ctk.CTkLabel(self, text=f"{str(queryresults[i][0]) + ':' : >5} {queryresults[i][1] : <16} {queryresults[i][2][:16] : <16} {queryresults[i][4][:24] :<26} {queryresults[i][5] if queryresults[i][5] is not None else '    ' : <6} {queryresults[i][6] : <8} {queryresults[i][7] : <10} {queryresults[i][9] : <20} {queryresults[i][10] : >8.2f}", font=("Courier", 14, "normal"))
 
@@ -794,22 +810,30 @@ class MainWindow(ctk.CTkScrollableFrame):
             label.bind("<Leave>", lambda event, temp_label=label: temp_label.configure(font=("Courier", 14, "normal"), fg_color="transparent"))
             
             label.bind("<Button-1>", lambda event, model_id=label.model_id: self.create_listing_window(model_id))
-            
-            #self.models.append(sell_button)
 
-            label.grid(row=j+1, column=0, pady=(0,5), sticky="w")
+            label.grid(row=row_index, column=0, pady=(0,5), sticky="w")
             
+            row_index += 1
             
-            
-            #sell_button.grid(row=j+1, column=0, pady=(0,5), sticky="w")
+        self.page_label.configure(text=f"{self.page_number} / {int(len(queryresults) / self.maxresults + 1)}")
 
     # Function to filter and change ordering of App.queryresults.
 
     def filter_results(self, results, attr, index):
 
-        "Reorder stored results from given input and button state."
+        "Reorder stored results from given input and button state."      
 
         toggle = self.filters[attr].toggle
+        
+        for button in self.filters:
+            
+            if button != self.filters[attr]:
+                
+                button.configure(fg_color="#4ab1ff")
+        
+            else:
+                
+                self.filters[attr].configure(fg_color="#286b9e")
 
         results = natsorted(results, key=lambda x: x[index])
 
@@ -821,7 +845,9 @@ class MainWindow(ctk.CTkScrollableFrame):
 
         self.master.queryresults  = results
 
-        self.display_query(self.master.queryresults)
+        self.display_query(self.master.queryresults, self.page_number)
+        
+        self.configure()
         
     def create_listing_window(self, model_id):
         
@@ -829,7 +855,23 @@ class MainWindow(ctk.CTkScrollableFrame):
         
         sell_window = SellWindow(self.master, backend.execute_query(search_query)[0])
         
-        #create_test_listing(f"model_id_{model_id}")
+    def set_page(self, value):
+        
+        if value > 0 and self.page_number < len(self.master.queryresults) / self.maxresults:
+            
+            self.page_number += value
+            
+            self.display_query(self.master.queryresults, self.page_number)
+        
+        elif value < 0 and self.page_number > 1:
+            
+            self.page_number += value
+            
+            self.display_query(self.master.queryresults, self.page_number)
+        
+        
+        
+        
 
 class SellWindow(ctk.CTkToplevel):
     
