@@ -480,6 +480,9 @@ def create_test_listing(image_urls, model_obj):
             
             print("LISTING FAILED.")
             
+            print(inventory_response.status_code)
+            print(inventory_response.text)
+            
             return None
     
         print(inventory_response.status_code)

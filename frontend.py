@@ -1082,6 +1082,19 @@ class SellWindow(ctk.CTkToplevel):
 
     def call_create_test_listing(self, image_urls, model_object):
         
+        """
+            TODO:
+            
+            Maybe implement custom return values for create_test_listing to narrow down errors for user.    
+            
+            Possible Errors:
+            
+                - Listing already exists
+                - No photos selected
+                - Dimensions incorrect
+                
+        """
+        
         model_object.model_dimensions = (float(self.length_textbox.get()), float(self.width_textbox.get()), float(self.height_textbox.get()))
         
         model_object.model_weight  = float(self.weight_textbox.get())

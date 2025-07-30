@@ -1,8 +1,11 @@
 __pycache__/
 model_car_venv/
 backup/
+build/
+dist/
 catalogue.db
 test.db
 catalogue.xlsx
 production_config.json
+main.spec
 .env
