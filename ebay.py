@@ -116,8 +116,6 @@ def get_policy_ids():
                 
             policyId = data[attribute + "Policies"][0][policy]
             
-            #print(f"{attribute} ID: {policyId}")
-            
             policyIds[policy] = policyId
         
         else:
@@ -212,7 +210,7 @@ def create_test_inventory_item(image_urls, model_obj):
     
     if len(image_urls) < 1:
         
-        print("INVENTORY CREATION FAILED: NO PHOTOS")
+        print("INVENTORY CREATION FAILED: NO PHOTOS SELECTED.")
         
         return None
     
@@ -266,8 +264,6 @@ def create_test_inventory_item(image_urls, model_obj):
       },
     }
     
-    print(body)
-    
     inventory_response = requests.put(endpoint, headers=headers, json=body)
     
     print(inventory_response.status_code)
@@ -301,7 +297,7 @@ def get_test_inventory_item(sku):
     
     if inventory_response.status_code == 200:
         
-        print("INVENTORY SUCCESSFULLY.")
+        print("INVENTORY SUCCESSFULLY PULLED.")
         
         inventory_data = inventory_response.json()
         
@@ -309,7 +305,7 @@ def get_test_inventory_item(sku):
         
     else:
         
-        print("INVENTORY FAILED.")
+        print("INVENTORY PULL FAILED.")
       
 """
     Written for testing purposes. Deletes all current inventory items from account.
@@ -334,11 +330,9 @@ def clear_inventory():
     
     data = inventory_response.json()
     
-    print(data)
-    
     if not data["total"] and not data["size"]:
         
-        print("No inventory items have been created.")
+        print("NO INVENTORY ITEMS CREATED.")
         
     else:            
     
@@ -365,11 +359,11 @@ def delete_inventory(sku):
     
     if delete_response.status_code in success_codes:
         
-        print("DELETION SUCCESSFUL.")
+        print("INVENTORY DELETION SUCCESSFUL.")
     
     else:
         
-        print("DELETION FAILED.")
+        print("INVENTORY DELETION FAILED.")
 
 """
     create_test_inventory_item() does NOT need to be called prior to calling this. It is called inside, every step of listing process is handled here.
@@ -378,9 +372,6 @@ def delete_inventory(sku):
 """    
 
 def create_test_listing(image_urls, model_obj):
-    
-    print(type(model_obj.model_dimensions[0]))
-    print(model_obj.model_weight)
     
     categoryIds = {
         "car" : "262320", 
@@ -404,10 +395,6 @@ def create_test_listing(image_urls, model_obj):
     model_type = model_obj.model_type
     
     categoryId = categoryIds[model_type]
-            
-    print(f"{model_type} : {categoryId}")
-    
-    print(model_obj.model_sku)
         
     inventory_created = create_test_inventory_item(image_urls, model_obj)
     
@@ -462,8 +449,6 @@ def create_test_listing(image_urls, model_obj):
     
     offer_id = check_offerId_exists(model_obj.model_sku)
     
-    print(offer_id)
-    
     if offer_id is None:
         
         inventory_response = requests.post(endpoint, headers=headers, json=body)
@@ -472,13 +457,13 @@ def create_test_listing(image_urls, model_obj):
             
             offer_id = inventory_response.json()["offerId"]
             
-            print("INVENTORY ADDED SUCCESSFULLY.")
+            print("OFFER CREATED SUCCESSFULLY.")
             
             print(offer_id)
             
         else:
             
-            print("LISTING FAILED.")
+            print("OFFER CREATION FAILED.")
             
             print(inventory_response.status_code)
             print(inventory_response.text)
@@ -497,11 +482,16 @@ def create_test_listing(image_urls, model_obj):
     
     if publish_response.status_code == 204 or publish_response.status_code == 200 or publish_response.status_code == 201:
     
-        print("LISTING LIVE")
+        print("LISTING PUBLISHED SUCCESSFULLY.")
     
         return publish_response.status_code
         
     else:
+        
+        print("LISTING FAILED.")
+        
+        print(publish_response.status_code)
+        print(publish_response.text)
         
         return None
 
@@ -528,7 +518,7 @@ def check_offerId_exists(sku):
         
         if "offers" in check_data and len(check_data["offers"]) > 0:
         
-            print("OFfer id found.")
+            print(f"OFFER ID FOUND.")
             
             print(check_response.text)
         
@@ -538,11 +528,13 @@ def check_offerId_exists(sku):
             
         else:
             
+            print("OFFER ID NOT FOUND.")
+            
             return None
             
     else:
         
-        print(f"Failed to find offer id for SKU {sku}")
+        print(f"NO OFFER FOR ITEM WITH SKU: {sku}.")
   
 """
     Allows a merchant location to be set when creating a listing.
@@ -573,7 +565,7 @@ def set_location(merchant_location_key):
 
     response = requests.post(endpoint, headers=headers, json=body)
 
-    print("LOCATRION FINSIHED")
+    print("LOCATION SET.")
 
     print(response.status_code)
     print(response.text)
@@ -624,19 +616,16 @@ def upload_listing_photo(image_path, image_name):
     
     if response.status_code == 200:
         
-        print(response.text)
-        print("\n\n\n\n")
+        print("IMAGE SUCCESSFULLY UPLOADED.")
             
         start = response.text.find("<FullURL>") + len("<FullURL>")
         end = response.text.find("</FullURL>")
         hosted_url = response.text[start:end]
-        print("SUCCESS UPLOADING.")
-        print("Hosted Image URL:", hosted_url) 
         
         return hosted_url
         
     else:
-        print("ERROR UPLOADING.") 
+        print("ERROR UPLOADING IMAGE.") 
         
 def get_listing_locations():
     
@@ -653,7 +642,7 @@ def get_listing_locations():
     
     if response.status_code == 200:
         
-        print("LISTING LOCATIONS FOUND,")
+        print("LISTING LOCATIONS FOUND.")
         
         data = response.json()
         

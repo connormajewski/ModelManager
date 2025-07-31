@@ -349,8 +349,6 @@ class Sidebar(ctk.CTkFrame):
 
                         search_query = search_query + f"\nAND {key}='{arguments[key]}'"
 
-        print(search_query)
-
         results = backend.execute_query(search_query)
 
         self.master.queryresults = results
@@ -792,8 +790,6 @@ class MainWindow(ctk.CTkScrollableFrame):
         x = (page_number - 1) * self.maxresults + 1
         y = (page_number - 1) * self.maxresults + self.maxresults + 1
         
-        print(f"{self.page_number}: {x} : {y} :: {y-x+1}")
-        
         row_index = 2
 
         for j in range(x, y if y < len(queryresults) + 1 else len(queryresults) + 1):#len(queryresults)+1):
@@ -845,7 +841,7 @@ class MainWindow(ctk.CTkScrollableFrame):
 
         self.master.queryresults  = results
 
-        self.display_query(self.master.queryresults, self.page_number)
+        self.display_query(results, self.page_number)
         
         self.configure()
         
@@ -892,12 +888,7 @@ class SellWindow(ctk.CTkToplevel):
     
     def __init__(self, master, model_attributes):
         
-        super().__init__(master)
-        
-        print("\n\n\n")
-        print(self.master)
-        print("\n\n\n")
-        
+        super().__init__(master)       
         
         width = 500
         height = 750
@@ -1109,8 +1100,6 @@ class SellWindow(ctk.CTkToplevel):
             self.image_urls.append(image)
             
             image_counter += 1
-            
-        print(self.image_urls)
         
         if self.image_urls:
             
@@ -1142,8 +1131,6 @@ class SellWindow(ctk.CTkToplevel):
         model_object.model_weight  = float(self.weight_textbox.get())
         
         response = create_test_listing(self.image_urls, model_object)
-        
-        print(f"\n\n\nTRESPONSE: {response}\n\n\n")
         
         if response is not None:
             

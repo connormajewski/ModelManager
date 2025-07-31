@@ -16,11 +16,7 @@ creation_query = '''
     )
 '''
 
-"""
-    CRUD functions for database. Should really only have to call create_table() when createing database.
-    
-    Pretty simple implementation. Figured canned queries were the way to go when making the program.
-"""
+# This variable sets db file to run in app.
 
 database_file = 'test.db'
 
@@ -43,7 +39,7 @@ def distinct_column_values(attribute):
     try:
         return execute_query(query)
     except sqlite3.Error as error:
-        print(f"Error grabbind distinct values. {error}")
+        print(f"Error grabbing distinct values. {error}")
 
 def create_table(creation_query):
 
@@ -60,7 +56,7 @@ def create_table(creation_query):
 
 
 def execute_query(query, params=None):
-
+    
     "Function to execute query on database, Bulk of calls to backend."
 
     try:
@@ -73,7 +69,7 @@ def execute_query(query, params=None):
         connection.commit()
         results = cursor.fetchall()
         cursor.close()
-        print(results)
+        #print(results)
         return results
     except sqlite3.Error as error:
         print(f"Error executing query: {error}")
@@ -106,8 +102,6 @@ def add_model(model_id, model_type, manufacturer, make, description, year, scale
 
     query = f"INSERT INTO models ({attribute_string}) VALUES ({insertion_string})"
 
-    print(query)
-
     try:
         execute_query(query)
         return True
@@ -132,8 +126,6 @@ def update_model(
 
     attr=["id", "model_type", "manufacturer", "make", "description", "year", "scale", "condition", "quantity", "location", "estimate"]
     attr_value=[model_id, model_type, manufacturer, make, description, year, scale, condition, quantity, location, estimated_value]
- 
-    print(model_id)
 
     query_values = []
     query_attr = []
@@ -154,8 +146,6 @@ def update_model(
 
     query=f"UPDATE models SET {q} WHERE id is {model_id}"
 
-    print(query)
-
     try:
         return execute_query(query)
     except sqlite3.Error as error:
@@ -174,9 +164,3 @@ def delete_model(model_id):
         return True
     except sqlite3.Error as error:
         print(f"Error deleting model: {error}")
-
-# distinct = distinct_column_values("model_type")
-
-# for e in list(distinct):
-    
-    # print(e[0])
