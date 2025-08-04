@@ -412,10 +412,6 @@ class Sidebar(ctk.CTkFrame):
     def edit_catalogue(self):
 
         edit_window = EditWindow(self)
-
-        self.edit_button.configure(state='disabled')
-        self.search_button.configure(state='disabled')
-        self.export_button.configure(state='disabled')
         
     def open_map(self):
         
@@ -426,6 +422,8 @@ class EditWindow(ctk.CTkToplevel) :
     "Secondary window for editing database entries."
 
     def __init__(self,master):
+        
+        # Bad attempt at enums, but it works I guess
         
         self.attribute_list_id_index = 0
         self.attribute_list_manufacturer_index = 1
@@ -438,6 +436,8 @@ class EditWindow(ctk.CTkToplevel) :
         self.attribute_list_estimated_index = 8
 
         super().__init__(master)
+        
+        self.grab_set()
 
         self.attribute = ([
             "ID",
@@ -585,12 +585,6 @@ class EditWindow(ctk.CTkToplevel) :
         self.protocol('WM_DELETE_WINDOW', self.close)
 
     def close(self):
-
-        "Toggle sidebar buttons and destroy window on close."
-
-        self.master.edit_button.configure(state='enabled')
-        self.master.search_button.configure(state='enabled')
-        self.master.export_button.configure(state='enabled')
 
         self.destroy()
         
@@ -894,6 +888,8 @@ class SellWindow(ctk.CTkToplevel):
         height = 750
         
         self.image_urls = []
+        
+        self.grab_set()
 
         "Construct layout for window as well as needed variables."
         
