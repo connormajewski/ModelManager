@@ -349,6 +349,8 @@ class Sidebar(ctk.CTkFrame):
 
                         search_query = search_query + f"\nAND {key}='{arguments[key]}'"
 
+        self.master.previous_query = search_query
+
         results = backend.execute_query(search_query)
 
         self.master.queryresults = results
@@ -421,19 +423,21 @@ class EditWindow(ctk.CTkToplevel) :
 
     "Secondary window for editing database entries."
 
-    def __init__(self,master):
+    def __init__(self,master, model_attributes):
         
         # Bad attempt at enums, but it works I guess
         
         self.attribute_list_id_index = 0
-        self.attribute_list_manufacturer_index = 1
-        self.attribute_list_make_index = 2
-        self.attribute_list_description_index = 3
-        self.attribute_list_year_index = 4
-        self.attribute_list_scale_index = 5
-        self.attribute_list_quantity_index = 6
-        self.attribute_list_location_index = 7
-        self.attribute_list_estimated_index = 8
+        self.attribute_list_type_index = 1
+        self.attribute_list_manufacturer_index = 2
+        self.attribute_list_make_index = 3
+        self.attribute_list_description_index = 4
+        self.attribute_list_year_index = 5
+        self.attribute_list_scale_index = 6
+        self.attribute_list_condition_index = 7
+        self.attribute_list_quantity_index = 8
+        self.attribute_list_location_index = 9
+        self.attribute_list_estimated_index = 10
 
         super().__init__(master)
         
@@ -441,11 +445,13 @@ class EditWindow(ctk.CTkToplevel) :
 
         self.attribute = ([
             "ID",
+            "Type",
             "Manufacturer",
             "Make",
             "Description",
             "Year",
             "Scale",
+            "Condition",
             "Quantity",
             "Location",
             "Estimated Value"
@@ -462,92 +468,58 @@ class EditWindow(ctk.CTkToplevel) :
         height=600
 
         self.title('Edit Catalogue')
-        self.geometry(f'{width}x{height}')
-        self.columnconfigure(1, weight=1)
-        self.rowconfigure(0, weight=1)
+        #self.geometry(f'{width}x{height}')
+        # self.columnconfigure(1, weight=1)
+        # self.rowconfigure(0, weight=1)
 
         self.attributes('-topmost', True)
 
         self.resizable(False, False)
+        
+        row = 0
 
-        for i in range(len(self.attribute)):
-
-            self.attribute_textbox = ctk.CTkEntry(
-                self,
-                placeholder_text=f'{self.attribute[i]}',
-                width=width,
-                height=30,
-            )
-
-            self.attribute_textbox.grid(
-                column=0,
-                row=i,
-                pady=(0,10)
-            )
-
-            self.attribute_list.append(self.attribute_textbox)
+        for i in range(1, len(model_attributes)):
             
-        self.model_type_textbox = ctk.CTkLabel(
-        
-            self,
-            text="Model Type",
-            height = 30
-        
-        )
-        
-        self.model_type_textbox.grid(
-        
-            column=0,
-            row = 10
-        
-        )
+            #print(f"{i}: {self.attribute[i]}")
+            
+            if i != self.attribute_list_condition_index:
+                
+                # self.attribute_label = ctk.CTkLabel(self, text=f"{self.attribute[i]}", justify="left")
+            
+                # self.attribute_label.grid(column=0,row=row,pady=(0,0))
 
-        self.model_type_menu= ctk.CTkComboBox(
-            self,
-            width=width,
-            height=30,
-            values=["car", "plane", "helicopter", "rocket", "ship", "balloon", "army", "truck", "submarine", "figurine", "motorcycle", "slotcar", "miscellaneous", "tank"]
-        )
+                self.attribute_textbox = ctk.CTkEntry(
+                    self,
+                    placeholder_text=f'{self.attribute[i]}',
+                    width=width,
+                    height=30,
+                )
 
-        self.model_type_menu.grid(
-            column=0,
-            row=10,
-        )
+                self.attribute_textbox.grid(
+                    column=0,
+                    row=row + 1,
+                    pady=(0,10)
+                )
+                
+                self.attribute_textbox.insert(0,f'{'' if model_attributes is None or model_attributes[i] is None else model_attributes[i]}')
+                
+                row += 2
+
+                self.attribute_list.append(self.attribute_textbox)
 
         self.condition_menu= ctk.CTkComboBox(
             self,
             width=width,
             height=30,
-            values=["opened", "sealed"]
+            values=["opened", "sealed"],
         )
+
+        self.condition_menu.set(model_attributes[self.attribute_list_condition_index])
 
         self.condition_menu.grid(
             column=0,
-            row=11,
+            row=row + 1,
         )
-
-        self.attribute_list.append(self.model_type_menu)
-        self.attribute_list.append(self.condition_menu)
-
-        self.add_button = ctk.CTkButton(
-            self,
-            text="Add Model",
-            width=width,
-            fg_color="#4ab1ff",
-            hover_color="#286b9e",
-            font=self.button_font,
-            command=lambda: self.add(              
-            )
-        )
-
-        self.add_button.grid(
-            column=0,
-            row=12,
-            pady=(10,0)
-        )
-        
-        
-        
 
         self.update_button = ctk.CTkButton(
             self,
@@ -557,12 +529,13 @@ class EditWindow(ctk.CTkToplevel) :
             hover_color="#286b9e",
             font=self.button_font,
             command=lambda: self.update(
+            model_attributes[0]
             )
         )
 
         self.update_button.grid(
             column=0,
-            row=13,
+            row=row + 2,
             pady=(10,0)
         )
 
@@ -573,12 +546,12 @@ class EditWindow(ctk.CTkToplevel) :
             fg_color="#4ab1ff",
             hover_color="#286b9e",
             font=self.button_font,
-            command = lambda: self.delete(self.attribute_list[0].get())
+            command = lambda: self.delete(model_attributes[0])
         )
 
         self.delete_button.grid(
             column=0,
-            row=14,
+            row=row + 3,
             pady=(10,0)
         )
 
@@ -586,39 +559,64 @@ class EditWindow(ctk.CTkToplevel) :
 
     def close(self):
 
+        self.grab_release()
+
         self.destroy()
+        
+        
         
     # Wrapper function for backend.update_model, so that alert box can be created on success. Didn't want
     # to have to be calling frontend functions in backend if i didn't have to.
         
-    def update(self):
+    def update(self, model_id):
         
         # Wanted to do an enum but currently on Python 3.12 not 3.4. Also didn't want a bunch
         # of magic numbers for attribute array so I did this. More readable, I think, at cost of more lines.
         
-
+        for e in range(len(self.attribute_list)):
+            
+            print(f"{e}: {self.attribute_list[e].get()}")
         
         status = backend.update_model(
-                self.attribute_list[self.attribute_list_id_index].get(),
-                self.model_type_menu.get(),
-                self.attribute_list[self.attribute_list_manufacturer_index].get(),
-                self.attribute_list[self.attribute_list_make_index].get(),
-                self.attribute_list[self.attribute_list_description_index].get(),
-                self.attribute_list[self.attribute_list_year_index].get(),
-                self.attribute_list[self.attribute_list_scale_index].get(),
+                model_id,
+                self.attribute_list[self.attribute_list_type_index - 1].get(),
+                self.attribute_list[self.attribute_list_manufacturer_index - 1].get(),
+                self.attribute_list[self.attribute_list_make_index - 1].get(),
+                self.attribute_list[self.attribute_list_description_index -  1].get(),
+                self.attribute_list[self.attribute_list_year_index - 1].get(),
+                self.attribute_list[self.attribute_list_scale_index - 1].get(),
                 self.condition_menu.get(),
-                self.attribute_list[self.attribute_list_quantity_index].get(),
-                self.attribute_list[self.attribute_list_location_index].get(),
-                self.attribute_list[self.attribute_list_estimated_index].get(),
+                self.attribute_list[self.attribute_list_quantity_index - 2].get(),
+                self.attribute_list[self.attribute_list_location_index - 2].get(),
+                self.attribute_list[self.attribute_list_estimated_index  - 2].get(),
             )
+            
+        """
+            TODO:
+            
+            Reloading resutls need to be amde into a function or something
+        
+        """
             
         if status is not None:
             
             AlertWindow("Sucess", "Update Successful.")
             
+            results = backend.execute_query(self.master.master.previous_query)
+            
+            self.master.master.queryresults = results
+            
+            self.master.display_query(results, self.master.page_number)
+            
+            print(self.master.current_filters, 0)
+            
+            self.master.filter_results(results, self.master.current_filters[0], self.master.current_filters[1], 0)
+            
         else:
             
             AlertWindow("Failure", "Update Failed.")
+            
+        self.close() 
 
             
     def delete(
@@ -634,9 +632,23 @@ class EditWindow(ctk.CTkToplevel) :
             
             AlertWindow("Success", "Deletion Successful.")
             
+            
+            
+            results = backend.execute_query(self.master.master.previous_query)
+            
+            self.master.master.queryresults = results
+            
+            self.master.display_query(results, self.master.page_number)
+            
+            print(self.master.current_filters, 0)
+            
+            self.master.filter_results(results, self.master.current_filters[0], self.master.current_filters[1], 0)
+            
         else:
             
             AlertWindow("Failure", "Deletion Failed.")
+            
+        self.close() 
             
             
     def add(self):
@@ -693,6 +705,7 @@ class MainWindow(ctk.CTkScrollableFrame):
         self.master = master
         
         self.page_number = 1
+        self.current_filters = (0,0)
         
         self.maxresults = 22
 
@@ -769,6 +782,10 @@ class MainWindow(ctk.CTkScrollableFrame):
         # Loading in all results to GUI slows down program considerably. If user wants to view all results, can export to file and view.
 
         self.page_number = page_number
+        
+        if page_number == 1:
+            
+            self.current_filters = (0,0)
 
         #maxresults = 22
 
@@ -780,6 +797,7 @@ class MainWindow(ctk.CTkScrollableFrame):
 
         # Display results up to maxresults to reduce loading time.
         # Append to models[] to allow for destruction on next display_query() call.
+        # Used labels with bind() instead of buttons for formatting reasons.
         
         x = (page_number - 1) * self.maxresults + 1
         y = (page_number - 1) * self.maxresults + self.maxresults + 1
@@ -800,6 +818,7 @@ class MainWindow(ctk.CTkScrollableFrame):
             label.bind("<Leave>", lambda event, temp_label=label: temp_label.configure(font=("Courier", 14, "normal"), fg_color="transparent"))
             
             label.bind("<Button-1>", lambda event, model_id=label.model_id: self.create_listing_window(model_id))
+            label.bind("<Button-3>", lambda event, model_id=label.model_id: self.edit_listing(model_id))
 
             label.grid(row=row_index, column=0, pady=(0,5), sticky="w")
             
@@ -809,11 +828,23 @@ class MainWindow(ctk.CTkScrollableFrame):
 
     # Function to filter and change ordering of App.queryresults.
 
-    def filter_results(self, results, attr, index):
+    def filter_results(self, results, attr, index, toggle_set=1):
+        
+        self.current_filters = (attr, index)
 
-        "Reorder stored results from given input and button state."      
+        "Reorder stored results from given input and button state."   
 
-        toggle = self.filters[attr].toggle
+        print(f"TPGGLE SET {toggle_set}")
+        
+        results = natsorted(results, key=lambda x: x[index])
+
+        toggle = 0
+
+        if toggle_set == 1:
+            
+            print("TOGGLING")
+            
+            toggle = self.filters[attr].toggle
         
         for button in self.filters:
             
@@ -824,8 +855,6 @@ class MainWindow(ctk.CTkScrollableFrame):
             else:
                 
                 self.filters[attr].configure(fg_color="#286b9e")
-
-        results = natsorted(results, key=lambda x: x[index])
 
         if toggle == 1:
 
@@ -844,6 +873,12 @@ class MainWindow(ctk.CTkScrollableFrame):
         search_query = f"SELECT * FROM models WHERE id is {model_id}"
         
         sell_window = SellWindow(self.master, backend.execute_query(search_query)[0])
+        
+    def edit_listing(self, model_id):
+        
+        search_query = f"SELECT * FROM models WHERE id is {model_id}"
+        
+        edit_window = EditWindow(self, backend.execute_query(search_query)[0])
         
     def set_page(self, value):
         
@@ -864,21 +899,6 @@ class MainWindow(ctk.CTkScrollableFrame):
         
 
 class SellWindow(ctk.CTkToplevel):
-    
-    class Model():
-        
-        def __init__(self, model_title, model_sku, model_type, model_manufacturer, model_scale, model_condition, model_price, model_quantity):
-            
-            self.model_title = model_title
-            self.model_sku = model_sku
-            self.model_type = model_type
-            self.model_manufacturer = model_manufacturer
-            self.model_scale = model_scale
-            self.model_condition = model_condition
-            self.model_price = model_price
-            self.model_quantity = model_quantity
-            self.model_dimensions = ()
-            self.model_weight = 0.00
     
     def __init__(self, master, model_attributes):
         
@@ -908,7 +928,7 @@ class SellWindow(ctk.CTkToplevel):
         
         model_sku = f"model_id_{model_id}"
         
-        self.model_object = self.Model(model_title, model_sku, model_type, model_manufacturer, model_scale, model_condition, model_price, model_quantity)
+        self.model_object = self.master.Model(model_title, model_sku, model_type, model_manufacturer, model_scale, model_condition, model_price, model_quantity)
         
         attributes = {"Brand" : model_manufacturer, "Scale" : model_scale, "Subject" : model_make, "Condition" : model_condition, "Price" : model_price}
                 
@@ -1140,6 +1160,23 @@ class SellWindow(ctk.CTkToplevel):
 class App(ctk.CTk):
 
     "Main App class. Program is contained within this class."
+    
+    # Model class used to pass information to SellWindow and EditWindow. 
+    
+    class Model():
+        
+        def __init__(self, model_title, model_sku, model_type, model_manufacturer, model_scale, model_condition, model_price, model_quantity):
+            
+            self.model_title = model_title
+            self.model_sku = model_sku
+            self.model_type = model_type
+            self.model_manufacturer = model_manufacturer
+            self.model_scale = model_scale
+            self.model_condition = model_condition
+            self.model_price = model_price
+            self.model_quantity = model_quantity
+            self.model_dimensions = ()
+            self.model_weight = 0.00
 
     def __init__(self):
 
@@ -1148,6 +1185,7 @@ class App(ctk.CTk):
         AppWidth=1920
         AppHeight=1080
 
+        self.previous_query = None
 
         # Stores results of database query to be filtered/exported.
 

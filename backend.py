@@ -59,6 +59,8 @@ def execute_query(query, params=None):
     
     "Function to execute query on database, Bulk of calls to backend."
 
+    print(query)
+
     try:
         connection = create_database_connection()
         cursor = connection.cursor()
