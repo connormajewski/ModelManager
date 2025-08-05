@@ -501,7 +501,11 @@ class EditWindow(ctk.CTkToplevel) :
                     pady=(0,10)
                 )
                 
-                self.attribute_textbox.insert(0,f'{'' if model_attributes is None or model_attributes[i] is None else model_attributes[i]}')
+                if model_attributes is not None and model_attributes[i] is not None:
+                    
+                    self.attribute_textbox.insert(0,model_attributes[i])
+                
+                
                 
                 row += 2
 
@@ -831,6 +835,8 @@ class MainWindow(ctk.CTkScrollableFrame):
     def filter_results(self, results, attr, index, toggle_set=1):
         
         self.current_filters = (attr, index)
+        
+        print(self.current_filters, 0)
 
         "Reorder stored results from given input and button state."   
 
@@ -863,6 +869,8 @@ class MainWindow(ctk.CTkScrollableFrame):
         self.filters[attr].toggle ^= 1
 
         self.master.queryresults  = results
+        
+        
 
         self.display_query(results, self.page_number)
         
@@ -1179,6 +1187,10 @@ class App(ctk.CTk):
             self.model_weight = 0.00
 
     def __init__(self):
+        
+        # Create backup of database on open, and on close.
+        
+        backend.create_backup()
 
         super().__init__()
 
@@ -1222,7 +1234,7 @@ class App(ctk.CTk):
 
         # Sidebar object for querying.
 
-        self.sidebar = Sidebar(self, 250, 600)
+        self.sidebar = Sidebar(self, 250, 600) # <- 250x600
         self.sidebar.grid(
             column=0,
             row=0,
@@ -1246,3 +1258,13 @@ class App(ctk.CTk):
             pady=10,
             sticky="nsew"
         )
+        
+        self.protocol("WM_DELETE_WINDOW", self.close)
+        
+    def close(self):
+        
+        print("CLOSING...")
+        
+        backend.create_backup()
+        
+        self.destroy()

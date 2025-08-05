@@ -1,4 +1,7 @@
 import sqlite3
+import os
+import shutil
+from datetime import datetime
 
 creation_query = '''
     CREATE TABLE IF NOT EXISTS models(
@@ -19,6 +22,9 @@ creation_query = '''
 # This variable sets db file to run in app.
 
 database_file = 'test.db'
+database_file_full_path = os.path.abspath(database_file)
+
+backup_directory = 'backup'
 
 def create_database_connection():
 
@@ -166,3 +172,13 @@ def delete_model(model_id):
         return True
     except sqlite3.Error as error:
         print(f"Error deleting model: {error}")
+
+def create_backup():
+    
+    filename = str(datetime.now())[:19].replace(":", "").replace("-","_").replace(" ", "_")
+    
+    backup_path = os.path.abspath(backup_directory) + "/" + filename + ".db"
+    
+    print(f"COPYING FROM {database_file_full_path} TO {backup_path}")
+    
+    shutil.copyfile(database_file_full_path, backup_path)
