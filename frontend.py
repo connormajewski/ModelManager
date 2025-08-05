@@ -355,7 +355,7 @@ class Sidebar(ctk.CTkFrame):
 
         self.master.queryresults = results
 
-        self.master.main_window.display_query(self.master.queryresults)
+        self.master.main_window.display_query(results) # <- self.master.queryresults
         
         results_length = len(self.master.queryresults)
         
@@ -425,6 +425,8 @@ class EditWindow(ctk.CTkToplevel) :
 
     def __init__(self,master, model_attributes):
         
+        super().__init__(master)
+        
         # Bad attempt at enums, but it works I guess
         
         self.attribute_list_id_index = 0
@@ -439,8 +441,6 @@ class EditWindow(ctk.CTkToplevel) :
         self.attribute_list_location_index = 9
         self.attribute_list_estimated_index = 10
 
-        super().__init__(master)
-        
         self.grab_set()
 
         self.attribute = ([
@@ -479,8 +479,6 @@ class EditWindow(ctk.CTkToplevel) :
         row = 0
 
         for i in range(1, len(model_attributes)):
-            
-            #print(f"{i}: {self.attribute[i]}")
             
             if i != self.attribute_list_condition_index:
                 
@@ -620,7 +618,7 @@ class EditWindow(ctk.CTkToplevel) :
             
             AlertWindow("Failure", "Update Failed.")
             
-        self.close() 
+        #self.close() 
 
             
     def delete(
@@ -652,7 +650,7 @@ class EditWindow(ctk.CTkToplevel) :
             
             AlertWindow("Failure", "Deletion Failed.")
             
-        self.close() 
+        #self.close() 
             
             
     def add(self):
@@ -709,7 +707,7 @@ class MainWindow(ctk.CTkScrollableFrame):
         self.master = master
         
         self.page_number = 1
-        self.current_filters = (0,0)
+        #self.current_filters = (0,0)
         
         self.maxresults = 22
 
@@ -778,18 +776,24 @@ class MainWindow(ctk.CTkScrollableFrame):
             self.page_decrement.bind("<Button-1>", lambda event, value=-1: self.set_page(value))
             self.page_increment.bind("<Button-1>", lambda event, value=1: self.set_page(value))
 
-    def display_query(self, queryresults, page_number=1) -> list:
+    def display_query(self, queryresults, page_number= -1) -> list:
 
         "Given a returned query from execute_query(), display to MainWindow object."
 
         # Max number of models to be shown when displaying results.
         # Loading in all results to GUI slows down program considerably. If user wants to view all results, can export to file and view.
 
-        self.page_number = page_number
-        
-        if page_number == 1:
+        # Page number of -1 means displaying results from Sidebar object using Search Catalogue button. This should also display in ID ascending order, which is filter (0,0).
+
+        if page_number == -1:
+            
+            self.page_number = 1
             
             self.current_filters = (0,0)
+            
+        else:
+            
+            self.page_number = page_number
 
         #maxresults = 22
 
@@ -803,9 +807,9 @@ class MainWindow(ctk.CTkScrollableFrame):
         # Append to models[] to allow for destruction on next display_query() call.
         # Used labels with bind() instead of buttons for formatting reasons.
         
-        x = (page_number - 1) * self.maxresults + 1
-        y = (page_number - 1) * self.maxresults + self.maxresults + 1
-        
+        x = (self.page_number - 1) * self.maxresults + 1
+        y = (self.page_number - 1) * self.maxresults + self.maxresults + 1
+
         row_index = 2
 
         for j in range(x, y if y < len(queryresults) + 1 else len(queryresults) + 1):#len(queryresults)+1):
@@ -835,12 +839,8 @@ class MainWindow(ctk.CTkScrollableFrame):
     def filter_results(self, results, attr, index, toggle_set=1):
         
         self.current_filters = (attr, index)
-        
-        print(self.current_filters, 0)
 
         "Reorder stored results from given input and button state."   
-
-        print(f"TPGGLE SET {toggle_set}")
         
         results = natsorted(results, key=lambda x: x[index])
 
@@ -869,8 +869,6 @@ class MainWindow(ctk.CTkScrollableFrame):
         self.filters[attr].toggle ^= 1
 
         self.master.queryresults  = results
-        
-        
 
         self.display_query(results, self.page_number)
         
