@@ -678,9 +678,11 @@ def check_access_token_validity():
         
         print("ACCESS TOKEN INVALID, GENERATING NEW ONE.")
         
-        refresh_access_token()
+        return -1
         
     if response.status_code == 200:
         
         print("ACCESS TOKEN VALID. NO ACTION REQUIRED.")
+        
+        return 0
         

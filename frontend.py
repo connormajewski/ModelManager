@@ -339,7 +339,7 @@ class Sidebar(ctk.CTkFrame):
                 elif key == 'keyword':
                     search_query = (
                     
-                        search_query + f"\nAND description LIKE '%{arguments[key]}%'\nOR make LIKE '%{arguments[key]}%'"
+                        search_query + f"\nAND (description LIKE '%{arguments[key]}%'\nOR make LIKE '%{arguments[key]}%')"
                     
                     )
 
@@ -677,22 +677,29 @@ class EditWindow(ctk.CTkToplevel) :
             
             AlertWindow("Failure", "Model Failed To Be Added To Database.")
         
-class AlertWindow():
+class AlertWindow(ctk.CTkToplevel):
     
-    def __init__(self, title, label):
+    def __init__(self, title, label, on_exit = None):
         
-        alert = ctk.CTkToplevel()
-        alert.geometry(f"300x150")
-        alert.attributes("-topmost", True)
-        alert.title(title)
+        super().__init__()
         
-        label = ctk.CTkLabel(alert, text=f"{label}", wraplength=275)
+        self.geometry(f"300x150")
+        self.attributes("-topmost", True)
+        self.title(title)
+        
+        label = ctk.CTkLabel(self, text=f"{label}", wraplength=275)
         label.pack(pady=20)
         
-        ok_button = ctk.CTkButton(alert, text="OK", command=alert.destroy)
+        ok_button = ctk.CTkButton(self, text="OK", command=self.destroy)
         ok_button.pack(pady=10)
         
-        alert.grab_set()
+        if on_exit is not None:
+            
+            self.protocol("WM_DELETE_WINDOW", on_exit)
+            
+            ok_button.configure(command=on_exit)
+        
+        self.grab_set()
 
 class MainWindow(ctk.CTkScrollableFrame):
 
@@ -1148,19 +1155,35 @@ class SellWindow(ctk.CTkToplevel):
                 
         """
         
-        model_object.model_dimensions = (float(self.length_textbox.get()), float(self.width_textbox.get()), float(self.height_textbox.get()))
+        l = self.length_textbox.get()
+        w = self.width_textbox.get()
+        h = self.height_textbox.get()
         
-        model_object.model_weight  = float(self.weight_textbox.get())
+        wg = self.weight_textbox.get()
         
-        response = create_test_listing(self.image_urls, model_object)
+        print(f"{w is None} {l} {h} {wg} {len(image_urls)}")
         
-        if response is not None:
+        if(l == '' or w == '' or h == '' or wg == '' or len(image_urls) == 0):
             
-            alert = AlertWindow(title="Sucess", label="Listing was successfully added. Check Ebay account for full listing info.")
+            alert = AlertWindow(title="Failure", label="Model dimensions, weight, and at least one image must be included to create listing.")
             
         else:
+                
+            model_object.model_dimensions = (float(self.length_textbox.get()), float(self.width_textbox.get()), float(self.height_textbox.get()))
+        
+            model_object.model_weight  = float(self.weight_textbox.get())
             
-            alert = AlertWindow(title="Failure", label="Listing could not be created.")
+            response = create_test_listing(self.image_urls, model_object)
+            
+            if response is not None:
+                
+                alert = AlertWindow(title="Sucess", label="Listing was successfully added. Check Ebay account for full listing info.")
+                
+            else:
+                
+                alert = AlertWindow(title="Failure", label="Listing could not be created.")
+        
+        
         
 
 class App(ctk.CTk):
@@ -1188,7 +1211,9 @@ class App(ctk.CTk):
         
         # Create backup of database on open, and on close.
         
-        backend.create_backup()
+        ### UNCOMMENT WHEN NEEDED
+        
+        #backend.create_backup()
 
         super().__init__()
 
@@ -1263,6 +1288,8 @@ class App(ctk.CTk):
         
         print("CLOSING...")
         
-        backend.create_backup()
+        ### UNCOMMENT WHEN NEEDED
+        
+        #backend.create_backup()
         
         self.destroy()
