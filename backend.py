@@ -2,6 +2,7 @@ import sqlite3
 import os
 import shutil
 from datetime import datetime
+from config import database_file
 
 creation_query = '''
     CREATE TABLE IF NOT EXISTS models(
@@ -21,7 +22,7 @@ creation_query = '''
 
 # This variable sets db file to run in app.
 
-database_file = 'test.db'
+# database_file = 'test.db'
 database_file_full_path = os.path.abspath(database_file)
 
 backup_directory = 'backup'

@@ -7,7 +7,7 @@ import customtkinter as ctk
 from openpyxl import Workbook
 import backend
 from natsort import natsorted
-from ebay import create_test_listing, clear_inventory
+from ebay import create_test_listing
 
 class Sidebar(ctk.CTkFrame):
     
@@ -1251,7 +1251,7 @@ class App(ctk.CTk):
         
         ### UNCOMMENT WHEN NEEDED
         
-        #backend.create_backup()
+        backend.create_backup()
 
         super().__init__()
 
@@ -1328,6 +1328,6 @@ class App(ctk.CTk):
         
         ### UNCOMMENT WHEN NEEDED
         
-        #backend.create_backup()
+        backend.create_backup()
         
         self.destroy()
