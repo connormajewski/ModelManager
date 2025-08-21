@@ -263,7 +263,7 @@ class Sidebar(ctk.CTkFrame):
 
         self.edit_button = ctk.CTkButton(
             self,
-            text="Edit Catalogue",
+            text="Add Model",
             width=width,
             fg_color=self.master.button_color,
             hover_color=self.master.button_hover_color,
@@ -423,7 +423,7 @@ class EditWindow(ctk.CTkToplevel) :
 
     "Secondary window for editing database entries."
 
-    def __init__(self,master, model_attributes):
+    def __init__(self,master, model_attributes=None):
         
         super().__init__(master)
         
@@ -468,7 +468,7 @@ class EditWindow(ctk.CTkToplevel) :
         height=600
 
         self.title('Edit Catalogue')
-        #self.geometry(f'{width}x{height}')
+        self.geometry(f'{width}x{height}')
         # self.columnconfigure(1, weight=1)
         # self.rowconfigure(0, weight=1)
 
@@ -478,7 +478,9 @@ class EditWindow(ctk.CTkToplevel) :
         
         row = 0
 
-        for i in range(1, len(model_attributes)):
+        for i in range(1, self.attribute_list_estimated_index + 1):
+            
+            print(i)
             
             if i != self.attribute_list_condition_index:
                 
@@ -516,46 +518,69 @@ class EditWindow(ctk.CTkToplevel) :
             values=["opened", "sealed"],
         )
 
-        self.condition_menu.set(model_attributes[self.attribute_list_condition_index])
+        if model_attributes is not None:
+            
+            self.condition_menu.set(model_attributes[self.attribute_list_condition_index])
 
         self.condition_menu.grid(
             column=0,
             row=row + 1,
         )
-
-        self.update_button = ctk.CTkButton(
-            self,
-            text="Update Model",
-            width=width,
-            fg_color="#4ab1ff",
-            hover_color="#286b9e",
-            font=self.button_font,
-            command=lambda: self.update(
-            model_attributes[0]
+        
+        if model_attributes is None:
+            
+            self.add_button = ctk.CTkButton(
+                self,
+                text="Add Model",
+                width=width,
+                fg_color="#4ab1ff",
+                hover_color="#286b9e",
+                font=self.button_font,
+                command=lambda: self.add(
+                )
             )
-        )
 
-        self.update_button.grid(
-            column=0,
-            row=row + 2,
-            pady=(10,0)
-        )
+            self.add_button.grid(
+                column=0,
+                row=row + 2,
+                pady=(10,0)
+            )
+            
+        else:
 
-        self.delete_button = ctk.CTkButton(
-            self,
-            text="Delete Model",
-            width=width,
-            fg_color="#4ab1ff",
-            hover_color="#286b9e",
-            font=self.button_font,
-            command = lambda: self.delete(model_attributes[0])
-        )
+            self.update_button = ctk.CTkButton(
+                self,
+                text="Update Model",
+                width=width,
+                fg_color="#4ab1ff",
+                hover_color="#286b9e",
+                font=self.button_font,
+                command=lambda: self.update(
+                model_attributes[0]
+                )
+            )
 
-        self.delete_button.grid(
-            column=0,
-            row=row + 3,
-            pady=(10,0)
-        )
+            self.update_button.grid(
+                column=0,
+                row=row + 2,
+                pady=(10,0)
+            )
+
+            self.delete_button = ctk.CTkButton(
+                self,
+                text="Delete Model",
+                width=width,
+                fg_color="#4ab1ff",
+                hover_color="#286b9e",
+                font=self.button_font,
+                command = lambda: self.delete(model_attributes[0])
+            )
+
+            self.delete_button.grid(
+                column=0,
+                row=row + 3,
+                pady=(10,0)
+            )
 
         self.protocol('WM_DELETE_WINDOW', self.close)
 
@@ -655,18 +680,30 @@ class EditWindow(ctk.CTkToplevel) :
             
     def add(self):
         
+        m_type = self.attribute_list[self.attribute_list_type_index - 1].get(),
+        manufacturer = self.attribute_list[self.attribute_list_manufacturer_index - 1].get(),
+        make = self.attribute_list[self.attribute_list_make_index - 1].get(),
+        desc = self.attribute_list[self.attribute_list_description_index - 1].get(),
+        year = self.attribute_list[self.attribute_list_year_index - 1].get(),
+        scale = self.attribute_list[self.attribute_list_scale_index - 1].get(),
+        condition = self.condition_menu.get(),
+        quantity = self.attribute_list[self.attribute_list_quantity_index - 2].get(),
+        location = self.attribute_list[self.attribute_list_location_index - 2].get(),
+        estimate = self.attribute_list[self.attribute_list_estimated_index - 2].get(),
+        
+
+        
         status = backend.add_model(
-                self.attribute_list[self.attribute_list_id_index].get(),
-                self.model_type_menu.get(),
-                self.attribute_list[self.attribute_list_manufacturer_index].get(),
-                self.attribute_list[self.attribute_list_make_index].get(),
-                self.attribute_list[self.attribute_list_description_index].get(),
-                self.attribute_list[self.attribute_list_year_index].get(),
-                self.attribute_list[self.attribute_list_scale_index].get(),
-                self.condition_menu.get(),
-                self.attribute_list[self.attribute_list_quantity_index].get(),
-                self.attribute_list[self.attribute_list_location_index].get(),
-                self.attribute_list[self.attribute_list_estimated_index].get(),
+                m_type[0] if m_type[0] != '' else None,
+                manufacturer[0] if manufacturer[0] != '' else None,
+                make[0] if make[0] != '' else None,
+                desc[0] if desc[0] != '' else None,
+                year[0] if year[0] != '' else None,
+                scale[0] if scale[0] != '' else None,
+                condition[0] if condition[0] != '' else None,
+                quantity[0] if quantity[0] != '' else None,
+                location[0] if location[0] != '' else None,
+                estimate[0] if estimate[0] != '' else None,
             )
             
         if status is not None:
@@ -675,8 +712,9 @@ class EditWindow(ctk.CTkToplevel) :
             
         else:
             
-            AlertWindow("Failure", "Model Failed To Be Added To Database.")
+            AlertWindow("Failure", "Model could not be added to database. Make sure all information is added.")
         
+
 class AlertWindow(ctk.CTkToplevel):
     
     def __init__(self, title, label, on_exit = None):
@@ -718,7 +756,7 @@ class MainWindow(ctk.CTkScrollableFrame):
         
         self.maxresults = 22
 
-        # This is displayed query results. This is GUI component, NOT actual database results.
+        # This is displayed query results. This is a list used to display GUI components, NOT actual database results. That is queryresults.
 
         self.models = []
         

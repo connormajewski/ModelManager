@@ -83,7 +83,7 @@ def execute_query(query, params=None):
         print(f"Error executing query: {error}")
         return None
 
-def add_model(model_id, model_type, manufacturer, make, description, year, scale, condition, quantity, location, estimate):
+def add_model(model_type, manufacturer, make, description, year, scale, condition, quantity, location, estimate):
 
     attribute_string = f"model_type, manufacturer, make, description, year, scale, condition, quantity, location, estimate"
     insertion_string = f"'{model_type}', '{manufacturer}', '{make}','{description}', '{year}', '{scale}', '{condition}', {quantity}, '{location}', {estimate}"
@@ -102,19 +102,15 @@ def add_model(model_id, model_type, manufacturer, make, description, year, scale
         
         attribute_string = f"model_type, manufacturer, make, description, scale, condition, quantity, location, estimate"
         insertion_string = f"'{model_type}', '{manufacturer}', '{make}', '{description}', '{scale}', '{condition}', {quantity}, '{location}', {estimate}"      
-    
-    if model_id != '':
-        
-        attribute_string = 'id, ' + attribute_string
-        insertion_string = f"{model_id}, " + insertion_string
+
 
     query = f"INSERT INTO models ({attribute_string}) VALUES ({insertion_string})"
 
     try:
-        execute_query(query)
-        return True
+        return execute_query(query)
     except sqlite3.Error as error:
         print(f"Error inserting model: {error}")
+        return None
 
 def update_model(
     model_id,
